@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirecting...</title>
+</head>
+<body>
+    <p>Redirecting to RaceDay app...</p>
+    <script>
+        // Get any query parameters from the URL (like OAuth code)
+        const params = window.location.search;
+        window.location.href = 'RaceDay://oauth/strava' + params;
+    </script>
+</body>
+</html>
