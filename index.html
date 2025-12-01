@@ -1,83 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecting</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 24px;
-        }
-
-        @media (prefers-color-scheme: light) {
-            body {
-                background: #f5f5f5;
-                color: #666;
-            }
-            .spinner {
-                border-color: #e0e0e0;
-                border-top-color: #999;
-            }
-        }
-
-        @media (prefers-color-scheme: dark) {
-            body {
-                background: #1c1c1e;
-                color: #999;
-            }
-            .spinner {
-                border-color: #333;
-                border-top-color: #666;
-            }
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .title {
-            font-size: 20px;
-            font-weight: 500;
-            margin: 0 0 8px 0;
-        }
-
-        .subtitle {
-            font-size: 15px;
-            margin: 0;
-            opacity: 0.8;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Returning to Race Day</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 32px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 20px;
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 3px solid;
+      border-color: rgba(150,150,150,0.2);
+      border-top-color: rgba(150,150,150,0.8);
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    code {
+      font-family: SFMono-Regular, Menlo, monospace;
+      font-size: 0.95rem;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: rgba(142,142,147,0.15);
+      word-break: break-all;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      color: white;
+      background: #ff8c38;
+    }
+    button.secondary {
+      background: transparent;
+      color: inherit;
+      border: 1px solid currentColor;
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: min(320px, 100%);
+    }
+  </style>
 </head>
 <body>
-    <div class="spinner"></div>
-    <p class="title">Returning to Race Day</p>
-    <p class="subtitle">You'll be redirected in just a moment.</p>
+  <div class="spinner" aria-hidden="true"></div>
+  <div>
+    <p class="title" style="font-size:1.2rem;font-weight:600;margin:0;">Returning to Race Day…</p>
+    <p class="subtitle" style="margin:8px 0;color:rgba(141,141,147,0.9);">
+      If the app doesn’t open automatically, copy the code below and paste it manually.
+    </p>
+  </div>
 
-    <script>
-        const params = window.location.search;
-        const deepLink = 'RaceDay://oauth/strava' + params;
-        
-        setTimeout(() => {
-            window.location.href = deepLink;
-        }, 1000);
-    </script>
+  <div id="code-block" style="display:none;">
+    <p style="margin:0 0 6px;">Authorization code:</p>
+    <code id="auth-code"></code>
+  </div>
+
+  <div class="actions">
+    <button id="open-app">Open Race Day</button>
+    <button id="copy-btn" class="secondary">Copy code</button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const query = window.location.search || "";
+    const code = params.get("code");
+    const deepLink = "mindmiles://oauth/strava" + query;
+
+    const codeBlock = document.getElementById("code-block");
+    const codeElement = document.getElementById("auth-code");
+    const copyBtn = document.getElementById("copy-btn");
+    const openBtn = document.getElementById("open-app");
+
+    if (code) {
+      codeBlock.style.display = "block";
+      codeElement.textContent = code;
+    } else {
+      copyBtn.disabled = true;
+    }
+
+    function openApp() {
+      window.location.replace(deepLink);
+    }
+
+    openBtn.addEventListener("click", openApp);
+
+    copyBtn.addEventListener("click", async () => {
+      if (!code) return;
+      try {
+        await navigator.clipboard.writeText(code);
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => (copyBtn.textContent = "Copy code"), 1500);
+      } catch (err) {
+        alert("Copy failed. Select the code manually and copy.");
+      }
+    });
+
+    // try automatically first
+    setTimeout(openApp, 500);
+  </script>
 </body>
 </html>
